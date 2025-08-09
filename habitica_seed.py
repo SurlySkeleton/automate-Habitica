@@ -12,6 +12,7 @@ API_URL = "https://habitica.com/api/v3/tasks/user"
 HEADERS = {
     "x-api-user": USER_ID,
     "x-api-key": API_TOKEN,
+    "x-client": f"{USER_ID}-habitica-seeder",  # required by Habitica
     "Content-Type": "application/json",
 }
 
