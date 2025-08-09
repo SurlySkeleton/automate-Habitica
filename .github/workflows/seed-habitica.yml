@@ -1,0 +1,29 @@
+name: Seed Habitica Daily Tasks
+
+on:
+  schedule:
+    # Runs every Monday at 2:00 AM UTC
+    - cron:  '0 2 * * 1'
+  workflow_dispatch: # allows manual run from Actions tab
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run Habitica seeder
+        env:
+          HABITICA_USER_ID: ${{ secrets.HABITICA_USER_ID }}
+          HABITICA_API_TOKEN: ${{ secrets.HABITICA_API_TOKEN }}
+        run: python habitica_seed.py
