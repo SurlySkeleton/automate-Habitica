@@ -31,8 +31,14 @@ def make_task_payload(due_dt):
     }
 
 def create_task(payload):
+    print("DEBUG: Sending payload to Habitica:")
+    print(payload)
     resp = requests.post(API_URL, json=payload, headers=HEADERS)
-    resp.raise_for_status()
+    try:
+        resp.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        print("ERROR response from Habitica:", resp.text)
+        raise e
     return resp.json()
 
 def main():
