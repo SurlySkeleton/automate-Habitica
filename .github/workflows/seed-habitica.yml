@@ -27,5 +27,4 @@ jobs:
           HABITICA_USER_ID: ${{ secrets.HABITICA_USER_ID }}
           HABITICA_API_TOKEN: ${{ secrets.HABITICA_API_TOKEN }}
           QUOTES_SOURCE: quotable
-          DAYS_AHEAD: '1'
         run: python habitica_seed.py
