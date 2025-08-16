@@ -70,7 +70,8 @@ def fetch_quote(source="local"):
             print(f"DEBUG: Failed to fetch from Quotable: {e}")
     # fallback
     print("DEBUG: Falling back to local quote...")
-    return random.choice(local_quotes)
+    return random.choice(LOCAL_QUOTES)
+
 
 # ─── PAYLOAD HELPERS ────────────────────────────────────────────────────────
 def make_task_payload(due_dt):
