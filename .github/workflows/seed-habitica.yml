@@ -2,14 +2,20 @@ name: Seed Habitica Daily Tasks
 
 on:
   schedule:
-    # Runs every Monday at 2:00 AM UTC
-    - cron:  '0 2 * * 1'
-  workflow_dispatch: # allows manual run from Actions tab
+    - cron: '0 2 * * 1'   # weekly; change if you want
+  workflow_dispatch:
 
 jobs:
   run-script:
     runs-on: ubuntu-latest
-
+    env:
+      HABITICA_USER_ID: ${{ secrets.HABITICA_USER_ID }}
+      HABITICA_API_TOKEN: ${{ secrets.HABITICA_API_TOKEN }}
+      # ====== your new config values ======
+      QUOTES_SOURCE: quotable   # or "" for local quotes
+      DAYS_AHEAD: '1'           # use '1' to test; change to '7' or '14' later
+      DEBUG: 'true'             # optional — keeps debug prints in logs
+      # =====================================
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
@@ -23,8 +29,4 @@ jobs:
         run: pip install requests
 
       - name: Run Habitica seeder
-        env:
-          HABITICA_USER_ID: ${{ secrets.HABITICA_USER_ID }}
-          HABITICA_API_TOKEN: ${{ secrets.HABITICA_API_TOKEN }}
-          QUOTES_SOURCE: quotable
         run: python habitica_seed.py
