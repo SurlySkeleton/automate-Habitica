@@ -55,26 +55,22 @@ LOCAL_QUOTES = [
 ]
 
 # ─── QUOTE FETCHER ───────────────────────────────────────────────────────────
-def get_quote():
-    """
-    Return a short string to place into the Notes. If QUOTES_SOURCE == 'quotable',
-    attempt to fetch a random quote from https://api.quotable.io/random.
-    Falls back to LOCAL_QUOTES on any failure.
-    """
-    if QUOTES_SOURCE == "quotable":
+def fetch_quote(source="local"):
+    if source == "quotable":
         try:
-            r = requests.get("https://api.quotable.io/random", timeout=8)
-            r.raise_for_status()
-            j = r.json()
-            content = j.get("content")
-            author = j.get("author")
-            if content:
-                return f"“{content}” — {author}" if author else f"“{content}”"
-        except Exception:
-            # silence errors and fall back to local quotes
-            pass
-    # default fallback
-    return random.choice(LOCAL_QUOTES)
+            print("DEBUG: Attempting to fetch quote from Quotable...")
+            response = requests.get("https://api.quotable.io/random", timeout=10)
+            print(f"DEBUG: Response status = {response.status_code}")
+            response.raise_for_status()
+            data = response.json()
+            quote = f"{data['content']} — {data['author']}"
+            print(f"DEBUG: Successfully fetched quote: {quote}")
+            return quote
+        except Exception as e:
+            print(f"DEBUG: Failed to fetch from Quotable: {e}")
+    # fallback
+    print("DEBUG: Falling back to local quote...")
+    return random.choice(local_quotes)
 
 # ─── PAYLOAD HELPERS ────────────────────────────────────────────────────────
 def make_task_payload(due_dt):
