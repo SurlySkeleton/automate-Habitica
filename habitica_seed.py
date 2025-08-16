@@ -8,6 +8,7 @@ Config via environment variables:
 - HABITICA_API_TOKEN
 - DAYS_AHEAD (optional, default 7)
 - QUOTES_SOURCE (optional) -> 'quotable' to fetch from https://api.quotable.io/random
+- DEBUG (optional) -> 'true' to print debug info
 """
 
 import os
@@ -21,6 +22,7 @@ API_TOKEN = os.getenv("HABITICA_API_TOKEN")
 
 DAYS_AHEAD = int(os.getenv("DAYS_AHEAD", "7"))  # change to 1 for quick tests
 QUOTES_SOURCE = os.getenv("QUOTES_SOURCE", "").lower()  # 'quotable' to fetch remote quote
+DEBUG = os.getenv("DEBUG", "false").lower() in ("1", "true", "yes")
 
 API_URL = "https://habitica.com/api/v3/tasks/user"
 
@@ -56,20 +58,29 @@ LOCAL_QUOTES = [
 
 # ─── QUOTE FETCHER ───────────────────────────────────────────────────────────
 def fetch_quote(source="local"):
+    """
+    Attempt to fetch a quote from the specified source. If it fails,
+    return a random local quote.
+    """
     if source == "quotable":
         try:
-            print("DEBUG: Attempting to fetch quote from Quotable...")
+            if DEBUG:
+                print("DEBUG: Attempting to fetch quote from Quotable...")
             response = requests.get("https://api.quotable.io/random", timeout=10)
-            print(f"DEBUG: Response status = {response.status_code}")
+            if DEBUG:
+                print(f"DEBUG: Response status = {response.status_code}")
             response.raise_for_status()
             data = response.json()
-            quote = f"{data['content']} — {data['author']}"
-            print(f"DEBUG: Successfully fetched quote: {quote}")
+            quote = f"{data.get('content')} — {data.get('author')}"
+            if DEBUG:
+                print(f"DEBUG: Successfully fetched quote: {quote}")
             return quote
         except Exception as e:
-            print(f"DEBUG: Failed to fetch from Quotable: {e}")
+            if DEBUG:
+                print(f"DEBUG: Failed to fetch from Quotable: {e}")
     # fallback
-    print("DEBUG: Falling back to local quote...")
+    if DEBUG:
+        print("DEBUG: Falling back to local quote...")
     return random.choice(LOCAL_QUOTES)
 
 
@@ -77,7 +88,8 @@ def fetch_quote(source="local"):
 def make_task_payload(due_dt):
     weekday = due_dt.strftime("%A").upper()            # e.g. SUNDAY
     title = f"# {weekday}"                             # e.g. "# SUNDAY"
-    notes = get_quote()                                # fun notes / quote
+    # call the correct function and pass the configured source
+    notes = fetch_quote(QUOTES_SOURCE)
 
     checklist_payload = [{"text": item} for item in CHECKLIST_ITEMS]
 
@@ -91,8 +103,9 @@ def make_task_payload(due_dt):
     }
 
 def create_task(payload):
-    print("DEBUG: Sending payload to Habitica:")
-    print(payload)
+    if DEBUG:
+        print("DEBUG: Sending payload to Habitica:")
+        print(payload)
     resp = requests.post(API_URL, json=payload, headers=HEADERS, timeout=15)
     try:
         resp.raise_for_status()
