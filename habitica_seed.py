@@ -21,7 +21,7 @@ from datetime import datetime, timedelta, time
 USER_ID = os.getenv("HABITICA_USER_ID")
 API_TOKEN = os.getenv("HABITICA_API_TOKEN")
 
-DAYS_AHEAD = int(os.getenv("DAYS_AHEAD", "1"))  # change to 1 for quick tests
+DAYS_AHEAD = int(os.getenv("DAYS_AHEAD", "7"))  # change to 1 for quick tests
 QUOTES_SOURCE = os.getenv("QUOTES_SOURCE", "repo").lower()  # default to repo
 DEBUG = os.getenv("DEBUG", "false").lower() in ("1", "true", "yes")
 
