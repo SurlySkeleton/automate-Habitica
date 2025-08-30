@@ -12,7 +12,7 @@ jobs:
       HABITICA_USER_ID: ${{ secrets.HABITICA_USER_ID }}
       HABITICA_API_TOKEN: ${{ secrets.HABITICA_API_TOKEN }}
       # ====== your new config values ======
-      QUOTES_SOURCE: quotable   # or "" for local quotes
+      QUOTES_SOURCE: repo   # or "" for local quotes
       DAYS_AHEAD: '1'           # use '1' to test; change to '7' or '14' later
       DEBUG: 'true'             # optional — keeps debug prints in logs
       # =====================================
