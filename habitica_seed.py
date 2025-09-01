@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
 """
-Create simple weekday To-Dos in Habitica with a formatted title,
-a stylized checklist, hard difficulty, and a short daily quote in the notes.
+Habitica seeder — single daily forward-populator based on Pacific time.
 
-Config via environment variables:
+Behavior:
+- Each run creates exactly ONE Todo for (today in America/Los_Angeles) + OFFSET_DAYS.
+- Keeps existing formatting: "# WEEKDAY" title, checklist, priority=Hard (2).
+- Notes pulled from quotes.json in repo root when QUOTES_SOURCE == "repo".
+- Task timestamp is set to 12:00:00 UTC on the due date to avoid timezone off-by-one visuals.
+
+Env/config:
 - HABITICA_USER_ID
 - HABITICA_API_TOKEN
-- DAYS_AHEAD (optional, default 7)
-- QUOTES_SOURCE (optional) -> 'repo' to read quotes.json in repo root (default)
+- OFFSET_DAYS (optional, default 30)  <- number of days ahead (30 for your requested behavior)
+- QUOTES_SOURCE (optional, default "repo")
 - DEBUG (optional) -> 'true' to print debug info
 """
 
@@ -16,12 +21,18 @@ import json
 import requests
 import random
 from datetime import datetime, timedelta, time
+try:
+    from zoneinfo import ZoneInfo  # Python 3.9+
+except Exception:
+    ZoneInfo = None
 
 # ─── CONFIG ─────────────────────────────────────────────────────────────────
 USER_ID = os.getenv("HABITICA_USER_ID")
 API_TOKEN = os.getenv("HABITICA_API_TOKEN")
 
-DAYS_AHEAD = int(os.getenv("DAYS_AHEAD", "7"))  # change to 1 for quick tests
+# Number of days forward relative to today IN PACIFIC TIME. Default 30.
+OFFSET_DAYS = int(os.getenv("OFFSET_DAYS", "30"))
+
 QUOTES_SOURCE = os.getenv("QUOTES_SOURCE", "repo").lower()  # default to repo
 DEBUG = os.getenv("DEBUG", "false").lower() in ("1", "true", "yes")
 
@@ -49,7 +60,7 @@ CHECKLIST_ITEMS = [
     "—",
 ]
 
-# A small fallback pool of fun/short quotes if repo file is missing or invalid.
+# Fallback quotes if repo file missing
 LOCAL_QUOTES = [
     "Tiny wins are still progress — celebrate them.",
     "Do the thing you told yourself you'd do yesterday.",
@@ -92,7 +103,7 @@ def fetch_quote(source="repo"):
 def make_task_payload(due_date):
     """
     due_date: a datetime.date representing the target calendar day.
-    We will set the task 'date' to noon UTC on that day to avoid timezone shifts
+    We set the task 'date' to noon UTC on that day to avoid timezone shifts
     that can make clients display the previous local day.
     """
     weekday = due_date.strftime("%A").upper()            # e.g. SUNDAY
@@ -119,7 +130,7 @@ def create_task(payload):
     if DEBUG:
         print("DEBUG: Sending payload to Habitica:")
         print(payload)
-    resp = requests.post(API_URL, json=payload, headers=HEADERS, timeout=15)
+    resp = requests.post(API_URL, json=payload, headers=HEADERS, timeout=20)
     try:
         resp.raise_for_status()
     except requests.exceptions.HTTPError as e:
@@ -129,19 +140,37 @@ def create_task(payload):
     return resp.json()
 
 
+# ─── MAIN ───────────────────────────────────────────────────────────────────
 def main():
     if not USER_ID or not API_TOKEN:
         print("ERROR: Set HABITICA_USER_ID and HABITICA_API_TOKEN environment variables.")
         exit(1)
 
-    # Using UTC date here (datetime.utcnow().date()) — we then set task time to noon UTC
-    # which prevents clients in negative timezones from displaying the previous day.
-    today_utc = datetime.utcnow().date()
-    for offset in range(1, DAYS_AHEAD + 1):
-        due = today_utc + timedelta(days=offset)
-        payload = make_task_payload(due)
-        result = create_task(payload)
-        print(f"Created: {payload['text']} → {result['data']['id']}")
+    # Determine "today" in Pacific time.
+    if ZoneInfo is not None:
+        try:
+            pacific_tz = ZoneInfo("America/Los_Angeles")
+            now_pacific = datetime.now(pacific_tz)
+            if DEBUG:
+                print(f"DEBUG: Now in Pacific tz = {now_pacific.isoformat()}")
+            today_pacific = now_pacific.date()
+        except Exception as e:
+            if DEBUG:
+                print(f"DEBUG: zoneinfo error, falling back to UTC for 'today': {e}")
+            today_pacific = datetime.utcnow().date()
+    else:
+        if DEBUG:
+            print("DEBUG: zoneinfo not available; falling back to UTC for 'today'.")
+        today_pacific = datetime.utcnow().date()
+
+    # Compute the single due date: today (Pacific) + OFFSET_DAYS
+    due = today_pacific + timedelta(days=OFFSET_DAYS)
+    if DEBUG:
+        print(f"DEBUG: OFFSET_DAYS={OFFSET_DAYS}. Creating task for due={due.isoformat()} (Pacific-based).")
+
+    payload = make_task_payload(due)
+    result = create_task(payload)
+    print(f"Created: {payload['text']} → {result['data']['id']}")
 
 
 if __name__ == "__main__":
