@@ -1,9 +1,12 @@
-name: Seed Habitica Daily Tasks
+name: Seed Habitica Daily Task (Pacific -> +OFFSET_DAYS)
 
+# Runs daily at 15:05 UTC (which is 08:05 PDT while DST is active).
+# NOTE: During PST (after DST ends) 15:05 UTC = 07:05 PST. If you want a constant 08:05 local time
+# you must change the cron to 16:05 UTC after DST ends (or use a scheduler outside GitHub Actions).
 on:
   schedule:
-    - cron: '0 2 * * 1'   # weekly; change if you want
-  workflow_dispatch:
+    - cron: '5 15 * * *'     # daily at 15:05 UTC
+  workflow_dispatch:         # manual run button in Actions tab
 
 jobs:
   run-script:
@@ -11,11 +14,9 @@ jobs:
     env:
       HABITICA_USER_ID: ${{ secrets.HABITICA_USER_ID }}
       HABITICA_API_TOKEN: ${{ secrets.HABITICA_API_TOKEN }}
-      # ====== your new config values ======
-      QUOTES_SOURCE: repo   # or "" for local quotes
-      DAYS_AHEAD: '35'           # use '1' to test; change to '7' or '14' later
-      DEBUG: 'true'             # optional — keeps debug prints in logs
-      # =====================================
+      QUOTES_SOURCE: repo
+      OFFSET_DAYS: '30'     # create task 30 days from "today in Pacific time"
+      DEBUG: 'false'        # set to 'true' while testing
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
