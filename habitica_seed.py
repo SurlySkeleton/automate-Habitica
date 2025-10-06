@@ -48,8 +48,6 @@ HEADERS = {
 
 # Checklist exactly as you requested
 CHECKLIST_ITEMS = [
-    "## Life",
-    "—",
     "## Work",
     "——— 🍅",
     "## Family",
