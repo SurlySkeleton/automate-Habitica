@@ -16,7 +16,7 @@ jobs:
       HABITICA_API_TOKEN: ${{ secrets.HABITICA_API_TOKEN }}
       QUOTES_SOURCE: repo
       OFFSET_DAYS: '30'     # create task 30 days from "today in Pacific time"
-      DEBUG: 'false'        # set to 'true' while testing
+      DEBUG: 'true'        # set to 'true' while testing
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
@@ -28,6 +28,11 @@ jobs:
 
       - name: Install dependencies
         run: pip install requests
+
+      - name: Show current directory
+        run: |
+          pwd
+          ls -R
 
       - name: Run Habitica seeder
         run: python habitica_seed.py
