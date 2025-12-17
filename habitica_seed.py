@@ -50,11 +50,14 @@ HEADERS = {
 CHECKLIST_ITEMS = [
     "## Work",
     "——— 🍅",
+    "—",
     "## Family",
     "—",
     "## Friends",
     "—",
     "## Health",
+    "—",
+    "## Gratitude",
     "—",
 ]
 
