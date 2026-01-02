@@ -48,17 +48,14 @@ HEADERS = {
 
 # Checklist exactly as you requested
 CHECKLIST_ITEMS = [
-    "## Work",
+    "## S-Tier",
     "——— 🍅",
     "—",
-    "## Family",
+    "## A-Tier",
     "—",
-    "## Friends",
+    "## B-Tier",
     "—",
-    "## Health",
-    "—",
-    "## Gratitude",
-    "—",
+    "## Happiness / Gratitudes",
 ]
 
 # Fallback quotes if repo file missing
