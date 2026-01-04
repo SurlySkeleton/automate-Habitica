@@ -48,13 +48,13 @@ HEADERS = {
 
 # Checklist exactly as you requested
 CHECKLIST_ITEMS = [
-    "## S-Tier",
+    "# S-Tier",
     "——— 🍅",
-    "—",
-    "## A-Tier",
-    "—",
-    "## B-Tier",
-    "—",
+    " ",
+    "# A-Tier",
+    " ",
+    "# B-Tier",
+    " ",
     "## Happiness / Gratitudes",
 ]
 
