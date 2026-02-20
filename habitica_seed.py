@@ -55,7 +55,7 @@ CHECKLIST_ITEMS = [
     " ",
     "# B-Tier",
     " ",
-    "## Happiness / Gratitudes",
+    "## Happiness / Gratitude",
 ]
 
 # Fallback quotes if repo file missing
